@@ -23,7 +23,6 @@ public class Eval {
 			this.value = value;
 		}
 
-		@Override
 		public int eval(Map<String, Integer> env) {
 			return this.value;
 		}
@@ -37,7 +36,6 @@ public class Eval {
 			this.rhs = rhs;
 		}
 		
-		@Override
 		public int eval(Map<String, Integer> env) {
 			return this.lhs.eval(env) + this.rhs.eval(env);
 		}
@@ -50,7 +48,6 @@ public class Eval {
 			this.exprs = Collections.unmodifiableList(exprs);
 		}
 
-		@Override
 		public int eval(Map<String, Integer> env) {
 			int result = 0;
 			for (Expr expr: this.exprs) {
@@ -68,7 +65,6 @@ public class Eval {
 			this.name = name;
 		}
 
-		@Override
 		public int eval(Map<String, Integer> env) {
 			return env.get(this.name);
 		}
@@ -85,7 +81,6 @@ public class Eval {
 			this.body = body;
 		}
 
-		@Override
 		public int eval(Map<String, Integer> env) {
 			Map<String,Integer> env2 = new HashMap<String, Integer>();
 			env2.putAll(env);

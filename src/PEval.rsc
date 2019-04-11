@@ -10,7 +10,7 @@ import String;
 
 /*
  * Conventions/assumptions on the interpreter:
- *  - method must be called eval and have @override 
+ *  - method must be called eval and have no @override 
  *  - always use this.x for field access; all fields assumed to be static AST nodes
  *  - can only call eval on fields (no looking inside)
  *  - only foreach on List nodes; no break and continue in such loops
@@ -133,8 +133,9 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
 } 
 
 MethodDec methodForNode(start[CompilationUnit] cu, str name, str methodName, bool toplevel) {
-  if (/(ClassDec)`static class <Id x> extends <ClassType t> <ClassBody body>` := cu, "<x>" == name) {
-    if (/(MethodDec)`@Override public <ResultType t> eval(<{FormalParam ","}* fs>) <MethodBody mb>` := body) {
+  if (/(ClassDec)`static class <Id x> extends <ClassType _> <ClassBody body>` := cu
+     || /(ClassDec)`static class <Id x> <ClassBody body>` := cu, "<x>" == capitalize(name)) {
+    if (/(MethodDec)`public <ResultType t> eval(<{FormalParam ","}* fs>) <MethodBody mb>` := body) {
       Id mId = [Id]methodName;
       if (toplevel) {
         return (MethodDec)`public static <ResultType t> <Id mId>(<{FormalParam ","}* fs>) <MethodBody mb>`;

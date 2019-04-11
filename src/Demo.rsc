@@ -20,13 +20,28 @@ void runIt() {
   compileAST("MyExpr", #AExpr, myExpr(), |project://peval-java-interpreter/src/Eval.java|);
 }
 
-/*
-public static void main(String[] args) {
-		Map<String,Integer> env = new HashMap<String, Integer>();
-		env.put("x", 3);
-		env.put("y", 2323);
-		System.out.println(myExpr(env));
-	
-	}
-*/
+
+data Machine
+  = machine(str name, list[State] states);
+  
+data State
+  = state(str name, list[Trans] trans);
+  
+data Trans
+  = trans(str event, str target);
+  
+
+Machine doors() = machine("Doors", [
+  state("closed", [
+    trans("open", "opened")
+  ]),
+  state("opened", [
+    trans("close", "closed")
+  ])
+]);
+
+void compileDoors() {
+  compileAST("Doors", #Machine, doors(), |project://peval-java-interpreter/src/RunStm.java|);
+}
+
 	
