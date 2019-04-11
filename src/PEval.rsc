@@ -15,8 +15,10 @@ data AExpr
   
 AExpr myExpr() = Add(Lit(1), Add(Seq([Var("x"), Lit(2)]), Var("y")));
   
-start[CompilationUnit] myCu() = parse(#start[CompilationUnit], |project://peval-java-interpreter/src/While.java|);  
-  
+
+void runIt() {
+  compileAST("MyExpr", #AExpr, myExpr(), |project://peval-java-interpreter/src/Eval.java|);
+}
 
 void compileAST(str name, type[node] meta, node n, loc eval) {
   start[CompilationUnit] cu = parse(#start[CompilationUnit], eval);
