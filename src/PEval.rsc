@@ -8,6 +8,21 @@ import ParseTree;
 import String;
 
 
+/*
+ * Conventions/assumptions on the interpreter:
+ *  - method must be called eval and have @override 
+ *  - always use this.x for field access; all fields assumed to be static AST nodes
+ *  - can only call eval on fields (no looking inside)
+ *  - only foreach on List nodes; no break and continue in such loops
+ *  - no modifications of fields (all deeply final)
+ *  - currently only supports int,str, list, and node
+ *  - static AST classes nested in a single class
+ * Peval:
+ *  - inline String, int etc literals (this.name => "x")
+ *  - inline eval calls to expr, (this.lhs.eval(env) => methodFor_23(env)
+ *  - unroll loops (for (Expr expr: this.exprs) {S} => {S_1} {S_2} {S_i}...)
+ */
+
 void compileAST(str name, type[node] meta, node n, loc eval) {
   start[CompilationUnit] cu = parse(#start[CompilationUnit], eval);
   newLoc = eval[file = "<name>.java"];
@@ -60,7 +75,6 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
   name = getName(n);
   kids = getChildren(n);
   fMap = fieldMap(meta, name);
-  println(fMap);
 
   methodName = mMap[n];
   
@@ -68,7 +82,6 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
   
   
   for (str f <- fMap) {
-    println("Handling field: <f>");
     Id fieldId = [Id]f;
     switch (kids[fMap[f]]) {
       case str s: {
@@ -82,7 +95,6 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
          }
       }
       case node x:  {
-         println("Handling node <x>");
          newMethod = visit (newMethod) {
            // matching against fieldId directly doesn't work
            case (Expr)`this.<Id someX>.eval(<{Expr ","}* args>)`: {
@@ -97,19 +109,21 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
       case list[node] xs:  {
         newMethod = visit (newMethod) {
           case (Stm)`for (<Type _> <Id var>: this.<Id someX>) <Block b>`: {
-            Block newBlock = (Block)`{}`;
-            for (node k <- xs) {
-               Id kidMethodId = [Id]mMap[k];
-               b2 = visit (b) {
-                 case (Expr)`<Id var>.eval(<{Expr ","}* args>)` 
-                   => (Expr)`<Id kidMethodId>(<{Expr ","}* args>)`
-               }
-               if ((Block)`{<BlockStm* bs>}` := newBlock) {
-                 newBlock = (Block)`{<BlockStm* bs>
+            if ("<someX>" == f) {
+              Block newBlock = (Block)`{}`;
+              for (node k <- xs) {
+                 Id kidMethodId = [Id]mMap[k];
+                 b2 = visit (b) {
+                   case (Expr)`<Id var>.eval(<{Expr ","}* args>)` 
+                     => (Expr)`<Id kidMethodId>(<{Expr ","}* args>)`
+                 }
+                 if ((Block)`{<BlockStm* bs>}` := newBlock) {
+                   newBlock = (Block)`{<BlockStm* bs>
                                    ' <Block b2>}`;
-               }
+                 }
+              }
+              insert (Stm)`<Block newBlock>`;
             }
-            insert (Stm)`<Block newBlock>`;
           }
         }
       }
@@ -120,7 +134,6 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
 
 MethodDec methodForNode(start[CompilationUnit] cu, str name, str methodName, bool toplevel) {
   if (/(ClassDec)`static class <Id x> extends <ClassType t> <ClassBody body>` := cu, "<x>" == name) {
-    println(x);
     if (/(MethodDec)`@Override public <ResultType t> eval(<{FormalParam ","}* fs>) <MethodBody mb>` := body) {
       Id mId = [Id]methodName;
       if (toplevel) {
@@ -129,6 +142,7 @@ MethodDec methodForNode(start[CompilationUnit] cu, str name, str methodName, boo
       return (MethodDec)`private static <ResultType t> <Id mId>(<{FormalParam ","}* fs>) <MethodBody mb>`;
     }  
   }
+  throw "Could not find interpreter class <name>";
 }
 
 // NB: there's sharing happening here, but it's ok

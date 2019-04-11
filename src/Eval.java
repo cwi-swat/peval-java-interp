@@ -1,20 +1,11 @@
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Eval {
 
-	/*
-	 * Conventions: 
-	 *  - always use this. for field access; all fields assumed to be static AST nodes
-	 *  - can only call eval on fields (no looking inside)
-	 *  - only foreach on List nodes; no break and continue.
-	 *  - no modifications of fields (all deeply final)
-	 * Peval:
-	 *  - inline String, int etc literals (this.name => "x")
-	 *  - inline eval calls to expr, (this.lhs.eval(env) => methodFor_23(env)
-	 *  - unroll loops (for (Expr expr: this.exprs) {S} => {S_1} {S_2} {S_i}...)
-	 */
+	
 	
 	// also a marker for AST
 	interface IEval {
@@ -84,5 +75,24 @@ public class Eval {
 		
 	}
 	
+	static class Let extends Expr {
+		private final String x;
+		private final Expr arg, body;
+		
+		public Let(String x, Expr arg, Expr body) {
+			this.x = x;
+			this.arg = arg;
+			this.body = body;
+		}
 
+		@Override
+		public int eval(Map<String, Integer> env) {
+			Map<String,Integer> env2 = new HashMap<String, Integer>();
+			env2.putAll(env);
+			env2.put(this.x, this.arg.eval(env));
+			return this.body.eval(env2);
+		}
+		
+	}
+	
 }
