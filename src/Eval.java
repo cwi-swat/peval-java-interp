@@ -8,7 +8,8 @@ public class Eval {
 	 * Conventions: 
 	 *  - always use this. for field access; all fields assumed to be static AST nodes
 	 *  - can only call eval on fields (no looking inside)
-	 *  - only foreach on List nodes
+	 *  - only foreach on List nodes; no break and continue.
+	 *  - no modifications of fields (all deeply final)
 	 * Peval:
 	 *  - inline String, int etc literals (this.name => "x")
 	 *  - inline eval calls to expr, (this.lhs.eval(env) => methodFor_23(env)
@@ -25,7 +26,7 @@ public class Eval {
 	}
 	
 	static class Lit extends Expr {
-		private int value;
+		private final int value;
 		
 		public Lit(int value) {
 			this.value = value;
@@ -38,7 +39,7 @@ public class Eval {
 	}
 	
 	static class Add extends Expr {
-		private Expr lhs, rhs;
+		private final Expr lhs, rhs;
 
 		public Add(Expr lhs, Expr rhs) {
 			this.lhs = lhs;
@@ -52,7 +53,7 @@ public class Eval {
 	}
 	
 	static class Seq extends Expr {
-		private List<Expr> exprs;
+		private final List<Expr> exprs;
 		
 		public Seq(List<Expr> exprs) {
 			this.exprs = Collections.unmodifiableList(exprs);
@@ -70,7 +71,7 @@ public class Eval {
 	}
 	
 	static class Var extends Expr {
-		private String name;
+		private final String name;
 		
 		public Var(String name) {
 			this.name = name;
