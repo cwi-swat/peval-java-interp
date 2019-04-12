@@ -8,6 +8,8 @@ import ParseTree;
 import String;
 
 
+// partialer, terpreter, pinterp, pevalier, syntactic partial evaluation
+
 /*
  * Conventions/assumptions on the interpreter:
  *  - method must be called eval and have no @override 
@@ -108,7 +110,7 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
       }
       case list[node] xs:  {
         newMethod = visit (newMethod) {
-          case (Stm)`for (<Type _> <Id var>: this.<Id someX>) <Block b>`: {
+          case (Stm)`for (<Type _> <Id var>: this.<Id someX>) <Stm b>`: {
             if ("<someX>" == f) {
               Block newBlock = (Block)`{}`;
               for (node k <- xs) {
@@ -119,7 +121,7 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
                  }
                  if ((Block)`{<BlockStm* bs>}` := newBlock) {
                    newBlock = (Block)`{<BlockStm* bs>
-                                   ' <Block b2>}`;
+                                     ' <Stm b2>}`;
                  }
               }
               insert (Stm)`<Block newBlock>`;
@@ -135,7 +137,8 @@ MethodDec methodForNode(type[node] meta, node n, map[node,str] mMap, start[Compi
 MethodDec methodForNode(start[CompilationUnit] cu, str name, str methodName, bool toplevel) {
   if (/(ClassDec)`static class <Id x> extends <ClassType _> <ClassBody body>` := cu
      || /(ClassDec)`static class <Id x> <ClassBody body>` := cu, "<x>" == capitalize(name)) {
-    if (/(MethodDec)`public <ResultType t> eval(<{FormalParam ","}* fs>) <MethodBody mb>` := body) {
+    if (/(MethodDec)`public <ResultType t> eval(<{FormalParam ","}* fs>) <MethodBody mb>` := body
+      || /(MethodDec)`@Override public <ResultType t> eval(<{FormalParam ","}* fs>) <MethodBody mb>` := body) {
       Id mId = [Id]methodName;
       if (toplevel) {
         return (MethodDec)`public static <ResultType t> <Id mId>(<{FormalParam ","}* fs>) <MethodBody mb>`;
@@ -147,13 +150,13 @@ MethodDec methodForNode(start[CompilationUnit] cu, str name, str methodName, boo
 }
 
 // NB: there's sharing happening here, but it's ok
-// (i.e. same subexpressions will map to single method)
+// (i.e. same subnodes will map to single method)
 map[node, str] methodMap(node n) {
   int i = 0;
   map[node, str] m = ();
   visit (n) {
     case node x: {
-      m[x] = "<getName(x)>_<i>";
+      m[x] = "<getName(x)>$<i>";
       i += 1;
     }
   }

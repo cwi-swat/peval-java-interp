@@ -50,9 +50,8 @@ public class Eval {
 
 		public int eval(Map<String, Integer> env) {
 			int result = 0;
-			for (Expr expr: this.exprs) {
+			for (Expr expr: this.exprs) 
 				result = expr.eval(env);
-			}
 			return result;
 		}
 		

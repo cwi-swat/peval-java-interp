@@ -6,44 +6,74 @@ public class Doors {
 		for (String event : events) {
 			{
 				{
-					state_1(event, rt);
+					state$2(event, rt);
 				}
 				{
-					state_3(event, rt);
+					state$4(event, rt);
+				}
+				{
+					state$6(event, rt);
 				}
 			}
 			System.out.println(rt[0]);
 		}
 	}
 
-	private static void state_1(String event, String[] rt) {
+	private static void state$2(String event, String[] rt) {
 		if (rt[0].equals("closed")) {
 			{
 				{
-					trans_0(event, rt);
+					trans$0(event, rt);
+				}
+				{
+					trans$1(event, rt);
 				}
 			}
 		}
 	}
 
-	private static void trans_0(String event, String[] rt) {
+	private static void trans$0(String event, String[] rt) {
 		if (event.equals("opened")) {
 			System.out.println("Transitioning to " + "opened");
 			rt[0] = "opened";
 		}
 	}
 
-	private static void state_3(String event, String[] rt) {
+	private static void trans$1(String event, String[] rt) {
+		if (event.equals("locked")) {
+			System.out.println("Transitioning to " + "locked");
+			rt[0] = "locked";
+		}
+	}
+
+	private static void state$4(String event, String[] rt) {
 		if (rt[0].equals("opened")) {
 			{
 				{
-					trans_2(event, rt);
+					trans$3(event, rt);
 				}
 			}
 		}
 	}
 
-	private static void trans_2(String event, String[] rt) {
+	private static void trans$3(String event, String[] rt) {
+		if (event.equals("closed")) {
+			System.out.println("Transitioning to " + "closed");
+			rt[0] = "closed";
+		}
+	}
+
+	private static void state$6(String event, String[] rt) {
+		if (rt[0].equals("locked")) {
+			{
+				{
+					trans$5(event, rt);
+				}
+			}
+		}
+	}
+
+	private static void trans$5(String event, String[] rt) {
 		if (event.equals("closed")) {
 			System.out.println("Transitioning to " + "closed");
 			rt[0] = "closed";

@@ -1,7 +1,6 @@
 import java.util.List;
 
 public class RunStm {
-	
 
 	static class Machine {
 		private final String name;
